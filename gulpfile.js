@@ -4,6 +4,7 @@ var gulp = require("gulp"),
     autoprefixer = require("autoprefixer"),
     cssnano = require("cssnano"),
     sourcemaps = require("gulp-sourcemaps");
+var browserSync = require("browser-sync").create();
 
 const sourcefile = './src/assets/scss/**/*.scss';
 const distfile = './dist/assets/css';
@@ -16,6 +17,9 @@ const distfile = './dist/assets/css';
 //         .pipe(sourcemaps.write('.'))
 //         .pipe(gulp.dest('./dist/assets/css'));
 // });
+function reload() {
+    browserSync.reload();
+}
 
 function style() {
     return (
@@ -38,6 +42,11 @@ function style() {
 exports.style = style;
 
 function watch() {
+    browserSync.init({
+        server: {
+            baseDir: "./dist"
+        }
+    });
     gulp.watch(sourcefile, style)
 }
 
