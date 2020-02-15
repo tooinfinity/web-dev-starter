@@ -10,23 +10,14 @@ const sourcefile = './src/assets/scss/**/*.scss';
 const distfile = './dist/assets/css';
 
 
-// gulp.task('sass', function () {
-//     return gulp.src('./src/assets/scss/**/*.scss')
-//         .pipe(sass().on('error', sass.logError))
-//         .pipe(autoprefixer())
-//         .pipe(sourcemaps.write('.'))
-//         .pipe(gulp.dest('./dist/assets/css'));
-// });
-function reload() {
-    browserSync.reload();
-}
-
 function style() {
     return (
         gulp
         .src(sourcefile)
         // Initialize sourcemaps before compilation starts
-        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.init({
+            loadMaps: true
+        }))
         .pipe(sass())
         .on("error", sass.logError)
         // Use postcss with autoprefixer and compress the compiled file using cssnano
@@ -47,7 +38,8 @@ function watch() {
             baseDir: "./dist"
         }
     });
-    gulp.watch(sourcefile, style)
+    gulp.watch(sourcefile, style);
+    gulp.watch(sourcefile).on('change', browserSync.reload);
 }
 
 exports.watch = watch
