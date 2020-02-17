@@ -3,43 +3,65 @@ var gulp = require("gulp"),
     postcss = require("gulp-postcss"),
     autoprefixer = require("autoprefixer"),
     cssnano = require("cssnano"),
-    sourcemaps = require("gulp-sourcemaps");
+    sourcemaps = require("gulp-sourcemaps"),
+    pug = require("gulp-pug"),
+    rename = require('gulp-rename');;
 var browserSync = require("browser-sync").create();
 
-const sourcefile = './src/assets/scss/**/*.scss';
-const distfile = './dist/assets/css';
-
-
+// compile scss file to css on public folder
 function style() {
-    return (
-        gulp
-        .src(sourcefile)
-        // Initialize sourcemaps before compilation starts
+    return gulp.src('./src/assets/scss/**/*.scss')
+        .pipe(sass())
+        .on("error", sass.logError)
+        .pipe(postcss([autoprefixer('last 2 versions')]))
+        .pipe(gulp.dest('./public/assets/css'));
+    browserSync.reload();
+}
+// compile scss file and minified to css on build
+function styleMin() {
+    return gulp.src('./src/assets/scss/**/*.scss')
         .pipe(sourcemaps.init({
             loadMaps: true
         }))
         .pipe(sass())
         .on("error", sass.logError)
-        // Use postcss with autoprefixer and compress the compiled file using cssnano
-        .pipe(postcss([autoprefixer({
-            browsers: ['last 2 versions'],
-            cascade: false
-        }), cssnano()]))
-        // Now add/write the sourcemaps
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(distfile))
-    );
+        .pipe(postcss([autoprefixer('last 2 versions'), cssnano()]))
+        .pipe(rename({
+            extname: '.min.css'
+        }))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('./dist/assets/css'))
 }
-exports.style = style;
+
+function html() {
+    return gulp.src('./src/html/**/*.pug')
+        .pipe(pug({
+            pretty: true
+        }))
+        .pipe(gulp.dest('./public'))
+}
+
+function htmlMin() {
+    return gulp.src('./src/html/**/*.pug')
+        .pipe(pug())
+        .pipe(gulp.dest('./dist'))
+}
+
+
 
 function watch() {
     browserSync.init({
         server: {
-            baseDir: "./dist"
+            baseDir: "./public"
         }
     });
-    gulp.watch(sourcefile, style);
-    gulp.watch(sourcefile).on('change', browserSync.reload);
+    gulp.watch('./src/assets/scss/**/*.scss', style).on('change', browserSync.reload);
+    gulp.watch('./src/html/**/*.pug', html).on('change', browserSync.reload);
 }
+
+exports.style = style;
+exports.styleMin = styleMin;
+exports.html = html;
+exports.htmlMin = htmlMin;
 
 exports.watch = watch
