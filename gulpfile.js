@@ -5,7 +5,8 @@ var gulp = require("gulp"),
     cssnano = require("cssnano"),
     sourcemaps = require("gulp-sourcemaps"),
     pug = require("gulp-pug"),
-    rename = require('gulp-rename');;
+    rename = require('gulp-rename'),
+    notify = require("gulp-notify");
 var browserSync = require("browser-sync").create();
 
 // compile scss file to css on public folder
@@ -14,10 +15,12 @@ function style() {
         .pipe(sass())
         .on("error", sass.logError)
         .pipe(postcss([autoprefixer('last 2 versions')]))
-        .pipe(gulp.dest('./public/assets/css'));
-    browserSync.reload();
+        .pipe(gulp.dest('./public/assets/css'))
+        .pipe(notify({
+            message: 'Compile <%= file.relative %> success'
+        }));
 }
-// compile scss file and minified to css on build
+// compile scss file and minified to css on dist folder
 function styleMin() {
     return gulp.src('./src/assets/scss/**/*.scss')
         .pipe(sourcemaps.init({
@@ -31,20 +34,30 @@ function styleMin() {
         }))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./dist/assets/css'))
+        .pipe(notify({
+            message: 'Compile and minified <%= file.relative %> success'
+        }))
 }
 
+// compile pug file to html on public folder
 function html() {
     return gulp.src('./src/html/**/*.pug')
         .pipe(pug({
             pretty: true
         }))
         .pipe(gulp.dest('./public'))
+        .pipe(notify({
+            message: 'Compile <%= file.relative %> success'
+        }))
 }
-
+// compile pug file and minified to html on dist folder
 function htmlMin() {
     return gulp.src('./src/html/**/*.pug')
         .pipe(pug())
         .pipe(gulp.dest('./dist'))
+        .pipe(notify({
+            message: 'Compile and minified <%= file.relative %> success'
+        }))
 }
 
 
